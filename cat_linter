@@ -51,16 +51,6 @@ imposter_exit=$?
 compare_output $cat_output $imposter_output
 compare_exit $cat_exit $imposter_exit
 
-echo "\nChecking \`echo \"hi\\\nnow\" | cat\`"
-
-cat_output=$(echo "hi\nnow" | cat)
-cat_exit=$?
-imposter_output=$(echo "hi\nnow" | $imposter)
-imposter_exit=$?
-
-compare_output $cat_output $imposter_output
-compare_exit $cat_exit $imposter_exit
-
 echo "\nChecking \`cat $file1 $file2\`"
 
 cat_output=$(cat $file1 $file2)
@@ -76,6 +66,16 @@ echo "\nChecking \`cat $file1 non-existent-file \`"
 cat_output=$(cat $file1 /tmp/non-existent-file 2>&1)
 cat_exit=$?
 imposter_output=$($imposter $file1 /tmp/non-existent-file 2>&1)
+imposter_exit=$?
+
+compare_output $cat_output $imposter_output
+compare_exit $cat_exit $imposter_exit
+
+echo "\nChecking \`echo \"hi\\\nnow\" | cat\`"
+
+cat_output=$(echo "hi\nnow" | cat)
+cat_exit=$?
+imposter_output=$(echo "hi\nnow" | $imposter)
 imposter_exit=$?
 
 compare_output $cat_output $imposter_output
