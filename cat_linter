@@ -19,7 +19,11 @@ function compare_output {
   if [[ $1 == $2 ]]; then
     echo "  Output matches"
   else
-    echo "  ERROR: Output didn't match\n    Expected: '$1'\n         Got: '$2'"
+    echo "  ERROR: Output didn't match"
+    echo
+    echo "  Expected: '$1'"
+    echo "       Got: '$2'"
+    echo
     exit 1
   fi
 }
@@ -28,7 +32,11 @@ function compare_exit {
   if [[ $1 -eq $2 ]]; then
     echo "  Exit matches"
   else
-    echo "  Expected: '$1'\n         Got: '$2'"
+    echo "ERROR: Exit code didn't match"
+    echo
+    echo "  Expected: '$1'"
+    echo "       Got: '$2'"
+    echo
     exit 1
   fi
 }
