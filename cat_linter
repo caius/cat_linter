@@ -106,3 +106,13 @@ imposter_exit=$?
 
 compare_output $cat_output $imposter_output
 compare_exit $cat_exit $imposter_exit
+
+echo "\nChecking \`echo \"how\\\nnow\\\nbrown\\\ncow\" | cat $file1 - /tmp/non-existent-file - $file2\`"
+
+cat_output=$(echo "how\nnow\nbrown\ncow" | cat $file1 - /tmp/non-existent-file - $file2 2>&1)
+cat_exit=$?
+imposter_output=$(echo "how\nnow\nbrown\ncow" | $imposter $file1 - /tmp/non-existent-file - $file2 2>&1)
+imposter_exit=$?
+
+compare_output $cat_output $imposter_output
+compare_exit $cat_exit $imposter_exit
