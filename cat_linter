@@ -8,6 +8,14 @@ fi
 
 imposter="$1"
 
+# Check we can call imposter
+a=$(echo "" | $imposter)
+if [[ ! $? -eq 0 ]]; then
+	echo "ERROR: failed to call $imposter"
+	exit 1
+fi
+
+
 file1=/tmp/cat_linter_file1
 file2=/tmp/cat_linter_file2
 file1_content="test\nsomething\nhere"
