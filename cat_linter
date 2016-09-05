@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 if [[ -z $1 ]]; then
   echo "Error: missing argument for binary to lint"
@@ -9,7 +9,7 @@ fi
 imposter="$1"
 
 # Check we can call imposter
-a=$(echo "" | $imposter)
+echo "" | $imposter > /dev/null 2>&1
 if [[ ! $? -eq 0 ]]; then
 	echo "ERROR: failed to call $imposter"
 	exit 1
@@ -20,17 +20,17 @@ file1=/tmp/cat_linter_file1
 file2=/tmp/cat_linter_file2
 file1_content="test\nsomething\nhere"
 file2_content="other\nthings\nhere"
-echo "$file1_content" > $file1
-echo "$file2_content" > $file2
+echo -e "$file1_content" > $file1
+echo -e "$file2_content" > $file2
 
 function compare_output {
-  if [[ $1 == $2 ]]; then
+  if [[ "$1" == "$2" ]]; then
     echo "  Output matches"
   else
     echo "  ERROR: Output didn't match"
     echo
-    echo "  Expected: '$1'"
-    echo "       Got: '$2'"
+    echo -e "  Expected: '$1'"
+    echo -e "       Got: '$2'"
     echo
     exit 1
   fi
@@ -42,8 +42,8 @@ function compare_exit {
   else
     echo "ERROR: Exit code didn't match"
     echo
-    echo "  Expected: '$1'"
-    echo "       Got: '$2'"
+    echo -e "  Expected: '$1'"
+    echo -e "       Got: '$2'"
     echo
     exit 1
   fi
@@ -57,64 +57,64 @@ echo "Linting cat against $imposter"
 #
 # will print the contents of file1 to the standard output.
 
-echo "\nChecking \`cat $file1\`":
+echo -e "\nChecking \`cat $file1\`":
 
 cat_output=$(cat $file1)
 cat_exit=$?
 imposter_output=$($imposter $file1)
 imposter_exit=$?
 
-compare_output $cat_output $imposter_output
+compare_output "$cat_output" "$imposter_output"
 compare_exit $cat_exit $imposter_exit
 
-echo "\nChecking \`cat $file1 $file2\`"
+echo -e "\nChecking \`cat $file1 $file2\`"
 
 cat_output=$(cat $file1 $file2)
 cat_exit=$?
 imposter_output=$($imposter $file1 $file2)
 imposter_exit=$?
 
-compare_output $cat_output $imposter_output
+compare_output "$cat_output" "$imposter_output"
 compare_exit $cat_exit $imposter_exit
 
-echo "\nChecking \`cat $file1 non-existent-file \`"
+echo -e "\nChecking \`cat $file1 non-existent-file \`"
 
 cat_output=$(cat $file1 /tmp/non-existent-file 2>&1)
 cat_exit=$?
 imposter_output=$($imposter $file1 /tmp/non-existent-file 2>&1)
 imposter_exit=$?
 
-compare_output $cat_output $imposter_output
+compare_output "$cat_output" "$imposter_output"
 compare_exit $cat_exit $imposter_exit
 
-echo "\nChecking \`echo \"hi\\\nnow\" | cat\`"
+echo -e "\nChecking \`echo \"hi\\\nnow\" | cat\`"
 
-cat_output=$(echo "hi\nnow" | cat)
+cat_output=$(echo -e "hi\nnow" | cat)
 cat_exit=$?
-imposter_output=$(echo "hi\nnow" | $imposter)
+imposter_output=$(echo -e "hi\nnow" | $imposter)
 imposter_exit=$?
 
-compare_output $cat_output $imposter_output
+compare_output "$cat_output" "$imposter_output"
 compare_exit $cat_exit $imposter_exit
 
-echo "\nChecking \`echo \"how\\\nnow\\\nbrown\\\ncow\" | cat $file1 - $file2\`"
+echo -e "\nChecking \`echo \"how\\\nnow\\\nbrown\\\ncow\" | cat $file1 - $file2\`"
 
-cat_output=$(echo "how\nnow\nbrown\ncow" | cat $file1 - $file2 2>&1)
+cat_output=$(echo -e "how\nnow\nbrown\ncow" | cat $file1 - $file2 2>&1)
 cat_exit=$?
-imposter_output=$(echo "how\nnow\nbrown\ncow" | $imposter $file1 - $file2 2>&1)
+imposter_output=$(echo -e "how\nnow\nbrown\ncow" | $imposter $file1 - $file2 2>&1)
 imposter_exit=$?
 
-compare_output $cat_output $imposter_output
+compare_output "$cat_output" "$imposter_output"
 compare_exit $cat_exit $imposter_exit
 
-echo "\nChecking \`echo \"how\\\nnow\\\nbrown\\\ncow\" | cat $file1 - /tmp/non-existent-file - $file2\`"
+echo -e "\nChecking \`echo \"how\\\nnow\\\nbrown\\\ncow\" | cat $file1 - /tmp/non-existent-file - $file2\`"
 
-cat_output=$(echo "how\nnow\nbrown\ncow" | cat $file1 - /tmp/non-existent-file - $file2 2>&1)
+cat_output=$(echo -e "how\nnow\nbrown\ncow" | cat $file1 - /tmp/non-existent-file - $file2 2>&1)
 cat_exit=$?
-imposter_output=$(echo "how\nnow\nbrown\ncow" | $imposter $file1 - /tmp/non-existent-file - $file2 2>&1)
+imposter_output=$(echo -e "how\nnow\nbrown\ncow" | $imposter $file1 - /tmp/non-existent-file - $file2 2>&1)
 imposter_exit=$?
 
-compare_output $cat_output $imposter_output
+compare_output "$cat_output" "$imposter_output"
 compare_exit $cat_exit $imposter_exit
 
 if which socat > /dev/null 2> /dev/null; then
@@ -123,7 +123,7 @@ if which socat > /dev/null 2> /dev/null; then
   function setup_socket() {
     socket="$1"
     rm -f "${socket}"
-    (echo "Linting my cat" | exec socat STDIN "UNIX-LISTEN:${socket}") &
+    (echo -e "Linting my cat" | exec socat STDIN "UNIX-LISTEN:${socket}") &
     socket_child=$!
     while ! test -S "${socket}"
     do
@@ -137,7 +137,7 @@ if which socat > /dev/null 2> /dev/null; then
     fi
   }
 
-  echo "\nChecking UNIX socket reading capabilities"
+  echo -e "\nChecking UNIX socket reading capabilities"
 
   socket="/tmp/cat_linter.sock"
   setup_socket "${socket}"
@@ -151,8 +151,8 @@ if which socat > /dev/null 2> /dev/null; then
   imposter_exit=$?
   cleanup_socket
 
-  compare_output $cat_output $imposter_output
+  compare_output "$cat_output" "$imposter_output"
   compare_exit $cat_exit $imposter_exit
 else
-  echo "\nNot checking UNIX socket reading capabilities - install socat for that\n"
+  echo -e "\nNot checking UNIX socket reading capabilities - install socat for that\n"
 fi
