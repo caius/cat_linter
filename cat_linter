@@ -118,14 +118,23 @@ compare_output $cat_output $imposter_output
 compare_exit $cat_exit $imposter_exit
 
 if which socat > /dev/null 2> /dev/null; then
+  socket_child=0
+
   function setup_socket() {
     socket="$1"
     rm -f "${socket}"
-    (echo "Linting my cat" | socat STDIN "UNIX-LISTEN:${socket}") &
+    (echo "Linting my cat" | exec socat STDIN "UNIX-LISTEN:${socket}") &
+    socket_child=$!
     while ! test -S "${socket}"
     do
       sleep 0.1
     done
+  }
+
+  function cleanup_socket() {
+    if [[ $socket_child -ne 0 ]]; then
+      kill $socket_child
+    fi
   }
 
   echo "\nChecking UNIX socket reading capabilities"
@@ -135,10 +144,12 @@ if which socat > /dev/null 2> /dev/null; then
 
   cat_output=$(cat ${socket} 2>&1)
   cat_exit=$?
+  cleanup_socket
 
   setup_socket "${socket}"
   imposter_output=$(${imposter} ${socket} 2>&1)
   imposter_exit=$?
+  cleanup_socket
 
   compare_output $cat_output $imposter_output
   compare_exit $cat_exit $imposter_exit
