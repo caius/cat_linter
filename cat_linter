@@ -116,3 +116,21 @@ imposter_exit=$?
 
 compare_output $cat_output $imposter_output
 compare_exit $cat_exit $imposter_exit
+
+if which socat > /dev/null 2> /dev/null; then
+  echo "\nChecking UNIX socket reading capabilities"
+
+  socket="/tmp/cat_linter.sock"
+  (echo "Linting my cat" | socat STDIN "UNIX-LISTEN:${socket}") &
+
+  cat_output=$(cat ${socket} 2>&1)
+  cat_exit=$?
+
+  imposter_output=$(${imposter} ${socket} 2>&1)
+  imposter_exit=$?
+
+  compare_output $cat_output $imposter_output
+  compare_exit $cat_exit $imposter_exit
+else
+  echo "\nNot checking UNIX socket reading capabilities - install socat for that\n"
+fi
