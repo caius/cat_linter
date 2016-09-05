@@ -126,6 +126,7 @@ if which socat > /dev/null 2> /dev/null; then
   cat_output=$(cat ${socket} 2>&1)
   cat_exit=$?
 
+  (echo "Linting my cat" | socat STDIN "UNIX-LISTEN:${socket}") &
   imposter_output=$(${imposter} ${socket} 2>&1)
   imposter_exit=$?
 
